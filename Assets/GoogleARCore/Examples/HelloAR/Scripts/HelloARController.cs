@@ -153,7 +153,7 @@ namespace GoogleARCore.Examples.HelloAR
                         var temp = Instantiate(Text, (andyObject.transform.position+Points[Points.Count - 2].transform.position)/2, Quaternion.identity);
                         temp.transform.LookAt(andyObject.transform.position);
                         temp.transform.localEulerAngles = new Vector3(90, temp.transform.localEulerAngles.y+90, 0);
-                        temp.GetComponent<TextMesh>().text = (Vector3.Distance(andyObject.transform.position, Points[Points.Count - 2].transform.position)*100).ToString("0.00");
+                        temp.GetComponent<TextMesh>().text = (Vector3.Distance(andyObject.transform.position, Points[Points.Count - 2].transform.position)*100).ToString("0.00")+" cm";
 
                     }
 
