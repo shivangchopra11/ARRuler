@@ -24,6 +24,8 @@ namespace GoogleARCore.Examples.HelloAR
     using GoogleARCore;
     using GoogleARCore.Examples.Common;
     using UnityEngine;
+    using UnityEngine.SceneManagement;
+    using UnityEngine.EventSystems;
 
 #if UNITY_EDITOR
     // Set up touch input propagation while using Instant Preview in the editor.
@@ -73,11 +75,36 @@ namespace GoogleARCore.Examples.HelloAR
 
 
         public List<GameObject> Points = new List<GameObject>();
+        public List<GameObject> AllPoints = new List<GameObject>();
+        public List<GameObject> Measures = new List<GameObject>();
+        public List<GameObject> AllMeasures = new List<GameObject>();
         public GameObject Text;
 
         /// <summary>
         /// The Unity Update() method.
         /// </summary>
+        /// 
+        
+        public void ResetScene() {
+            // SceneManager.LoadScene("ARRuler");
+            foreach(GameObject go in AllPoints) {
+                Destroy(go);
+            }
+            foreach(GameObject go in AllMeasures) {
+                Destroy(go);
+            }
+            Points.Clear();
+            Measures.Clear();
+            AllMeasures.Clear();
+            AllMeasures.Clear();
+        }
+
+        public void NewMarker() {
+            Points.Clear();
+            Measures.Clear();
+        }
+
+
         public void Update()
         {
 
@@ -119,7 +146,7 @@ namespace GoogleARCore.Examples.HelloAR
 
             // If the player has not touched the screen, we are done with this update.
             Touch touch;
-            if (Input.touchCount < 1 || (touch = Input.GetTouch(0)).phase != TouchPhase.Began)
+            if (Input.touchCount < 1 || (touch = Input.GetTouch(0)).phase != TouchPhase.Began || EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
             {
                 return;
             }
@@ -145,17 +172,24 @@ namespace GoogleARCore.Examples.HelloAR
                     var andyObject = Instantiate(AndyAndroidPrefab, hit.Pose.position, hit.Pose.rotation);
 
                     Points.Add(andyObject);
-                    if(Points.Count>=2) {
-                        andyObject.GetComponent<LineRenderer>().positionCount = 2;
-                        andyObject.GetComponent<LineRenderer>().SetPosition(0,andyObject.transform.position);
-                        andyObject.GetComponent<LineRenderer>().SetPosition(1,Points[Points.Count - 2].transform.position);
+                    AllPoints.Add(andyObject);
+                    // if(!EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
+                    // {
+                        if(Points.Count>=2) {
+                            andyObject.GetComponent<LineRenderer>().positionCount = 2;
+                            andyObject.GetComponent<LineRenderer>().SetPosition(0,andyObject.transform.position);
+                            andyObject.GetComponent<LineRenderer>().SetPosition(1,Points[Points.Count - 2].transform.position);
 
-                        var temp = Instantiate(Text, (andyObject.transform.position+Points[Points.Count - 2].transform.position)/2, Quaternion.identity);
-                        temp.transform.LookAt(andyObject.transform.position);
-                        temp.transform.localEulerAngles = new Vector3(90, temp.transform.localEulerAngles.y+90, 0);
-                        temp.GetComponent<TextMesh>().text = (Vector3.Distance(andyObject.transform.position, Points[Points.Count - 2].transform.position)*100).ToString("0.00")+" cm";
-
-                    }
+                            
+                            var temp = Instantiate(Text, (andyObject.transform.position+Points[Points.Count - 2].transform.position)/2, Quaternion.identity);
+                            temp.transform.LookAt(andyObject.transform.position);
+                            temp.transform.localEulerAngles = new Vector3(90, temp.transform.localEulerAngles.y+90, 0);
+                            temp.GetComponent<TextMesh>().text = (Vector3.Distance(andyObject.transform.position, Points[Points.Count - 2].transform.position)*100).ToString("0.00")+" cm";
+                            Measures.Add(temp);
+                            AllMeasures.Add(temp);
+                        }
+                    // }
+                    
 
                     // Compensate for the hitPose rotation facing away from the raycast (i.e. camera).
                     andyObject.transform.Rotate(0, k_ModelRotation, 0, Space.Self);
